@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <title>Proyecto Reanima+ Vida</title>
+  <meta name="description" content="Asistente web de soporte vital básico y desfibrilación precoz." />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="application-name" content="Reanima+ Vida" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Reanima+ Vida" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:title" content="Proyecto Reanima+ Vida" />
+  <meta property="og:description" content="Asistente rápido de RCP básica con metrónomo, DEA y guía paso a paso." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="assets/preview-reanima-vida.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Proyecto Reanima+ Vida" />
+  <meta name="twitter:description" content="Asistente rápido de RCP básica con metrónomo y guía DEA." />
+  <meta name="twitter:image" content="assets/preview-reanima-vida.png" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" href="assets/icon-512.png" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --muted: #5e6875;
+      --line: #e7ebef;
+      --card: #f6f8fa;
+      --green: #008000;
+      --red: #e10600;
+      --blue: #0066cc;
+      --blue-soft: #dceeff;
+      --yellow: #ffd700;
+      --orange: #ff8c00;
+      --grayBtn: #555555;
+      --shadow: 0 10px 24px rgba(0,0,0,.08);
+      --radius: 24px;
+      --safe-top: max(env(safe-area-inset-top), 12px);
+      --safe-bottom: max(env(safe-area-inset-bottom), 12px);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { min-height: 100vh; }
+    button, a { font: inherit; }
+    .app { max-width: 720px; margin: 0 auto; min-height: 100vh; position: relative; background: var(--bg); }
+    .screen { display: none; min-height: 100vh; padding: calc(var(--safe-top) + 8px) 16px calc(var(--safe-bottom) + 16px); }
+    .screen.active { display: flex; flex-direction: column; }
+    .splash { align-items: center; justify-content: center; text-align: center; gap: 18px; }
+    .logo { width: 112px; height: 112px; object-fit: contain; }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+    .brand img { width: 52px; height: 52px; border-radius: 14px; object-fit: contain; }
+    .brand-title { font-size: 1.15rem; font-weight: 800; line-height: 1.1; }
+    .legal-banner {
+      background: #fff7d1; border: 1px solid #f0d94d; color: #332800;
+      padding: 10px 12px; border-radius: 16px; font-size: .92rem; margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(2rem, 5vw, 2.6rem); line-height: 1.05; font-weight: 900; }
+    h2 { font-size: clamp(1.6rem, 4vw, 2rem); line-height: 1.08; font-weight: 850; }
+    .hero-text { color: var(--muted); font-size: 1.05rem; margin-top: 10px; }
+    .spacer { flex: 1; }
+    .btn {
+      border: 0; width: 100%; min-height: 64px; border-radius: 22px; color: white; font-weight: 800;
+      padding: 16px 18px; display: inline-flex; justify-content: center; align-items: center; text-align: center;
+      box-shadow: var(--shadow); cursor: pointer; text-decoration: none;
+    }
+    .btn + .btn { margin-top: 12px; }
+    .btn-xl { min-height: 78px; font-size: 1.24rem; }
+    .btn-green { background: var(--green); }
+    .btn-red { background: var(--red); }
+    .btn-blue { background: var(--blue); }
+    .btn-gray { background: var(--grayBtn); }
+    .btn-yellow { background: var(--yellow); color: #231c00; }
+    .btn-orange { background: var(--orange); }
+    .btn-soft { background: var(--blue-soft); color: #0f3560; }
+    .btn-outline { background: #fff; color: var(--text); border: 2px solid var(--line); box-shadow: none; }
+    .mini-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .footer-nav { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+    .footer-nav .btn { min-height: 56px; font-size: 1rem; }
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
+    }
+    .question-card {
+      margin-top: 18px; padding: 22px 18px; text-align: center;
+    }
+    .question-sub { color: var(--muted); font-size: 1rem; margin-top: 10px; }
+    .top-actions { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 12px 0 14px; }
+    .top-actions .btn { min-height: 74px; font-size: 1rem; padding: 10px; }
+    .metrics { display: grid; grid-template-columns: 1.2fr .8fr; gap: 12px; }
+    .metric { text-align: center; }
+    .metric-label { color: var(--muted); font-size: .9rem; font-weight: 700; letter-spacing: .02em; text-transform: uppercase; }
+    .metric-value { font-size: clamp(2rem, 6vw, 3rem); font-weight: 900; margin-top: 6px; }
+    .bpm-tag { font-size: 1.05rem; font-weight: 800; }
+    .instruction-stack { display: grid; gap: 10px; margin-top: 14px; }
+    .instruction-pill {
+      background: white; border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; font-size: 1.08rem; font-weight: 800;
+    }
+    .cycle-box {
+      margin-top: 14px; background: #fff7d1; border: 1px solid #f0d94d; color: #332800;
+      border-radius: 18px; padding: 14px; font-weight: 800; text-align: center;
+    }
+    .progress-shell { height: 16px; background: #ffffff; border-radius: 999px; overflow: hidden; margin-top: 10px; border: 1px solid #ecd962; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #ffd700, #ff9f1a); transition: width 1s linear; }
+    .bottom-fixed {
+      position: sticky; bottom: calc(var(--safe-bottom)); margin-top: 14px;
+    }
+    .tiny-row { display: flex; gap: 10px; margin-top: 12px; }
+    .tiny-row .btn { min-height: 52px; font-size: .96rem; }
+    .list { display: grid; gap: 10px; margin-top: 14px; }
+    .step { display: flex; gap: 12px; align-items: flex-start; background: white; border-radius: 18px; padding: 14px; border: 1px solid var(--line); }
+    .step-num {
+      min-width: 34px; height: 34px; border-radius: 50%; background: var(--blue); color: white; display: grid; place-items: center; font-weight: 900;
+    }
+    .small { font-size: .95rem; color: var(--muted); }
+    .section-title { font-size: 1.15rem; font-weight: 900; margin-bottom: 10px; }
+    .switch-row { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    .switch-row:last-child { border-bottom: 0; }
+    .toggle { width: 56px; height: 32px; border-radius: 999px; border: 0; background: #c7ced6; position: relative; cursor: pointer; }
+    .toggle::after { content: ""; width: 24px; height: 24px; border-radius: 50%; background: white; position: absolute; top: 4px; left: 4px; transition: transform .2s ease; box-shadow: 0 4px 10px rgba(0,0,0,.15); }
+    .toggle.on { background: var(--green); }
+    .toggle.on::after { transform: translateX(24px); }
+    .chip-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .chip { border: 2px solid var(--line); background: white; color: var(--text); border-radius: 999px; min-height: 46px; padding: 10px 16px; font-weight: 800; }
+    .chip.active { background: var(--blue); color: white; border-color: var(--blue); }
+    .history-item { background: white; border: 1px solid var(--line); border-radius: 18px; padding: 14px; }
+    .poster { width: 100%; border-radius: 20px; border: 1px solid var(--line); box-shadow: var(--shadow); margin-top: 12px; }
+    .hidden { display: none !important; }
+    .install-box { margin-top: 14px; }
+    .map-box { margin-top: 14px; }
+    .map-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+    .notice { margin-top: 12px; font-size: .98rem; color: var(--muted); }
+    .big-center { text-align: center; margin-top: 18px; }
+    .final-time { font-size: clamp(2rem, 7vw, 3.4rem); font-weight: 900; margin-top: 10px; }
+    @media (max-width: 520px) {
+      .top-actions { grid-template-columns: 1fr; }
+      .metrics, .mini-grid, .map-actions { grid-template-columns: 1fr; }
+      .footer-nav { grid-template-columns: 1fr 1fr; }
+      .brand-title { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <section id="splash" class="screen splash active">
+      <img class="logo" src="assets/icon-512.png" alt="Logotipo Proyecto Reanima+ Vida" />
+      <div>
+        <h1>Proyecto Reanima+ Vida</h1>
+        <p class="hero-text">Formación y asistencia en Soporte Vital Básico</p>
+      </div>
+    </section>
+
+    <section id="home" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">Proyecto<br>Reanima+ Vida</div>
+      </div>
+      <div class="legal-banner">Esta app no sustituye atención médica profesional. Llama al 112 ante cualquier sospecha de paro cardiaco.</div>
+      <div class="card">
+        <h2>Asistente rápido de RCP básica</h2>
+        <p class="hero-text">Abre la app, sigue los pasos y activa el metrónomo. Todo pensado para usarse con nervios y en segundos.</p>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn btn-red btn-xl" data-go="check">Emergencia real</button>
+        <button class="btn btn-green btn-xl" data-go="training">Modo entrenamiento</button>
+      </div>
+      <div class="install-box card hidden" id="installBox">
+        <div class="section-title">Añadir a inicio</div>
+        <p>Guárdala como acceso directo para abrirla como app en iPhone y Android.</p>
+        <button class="btn btn-blue" id="installBtn">Instalar app</button>
+      </div>
+      <div class="spacer"></div>
+      <div class="footer-nav">
+        <button class="btn btn-outline" data-go="history">Historial</button>
+        <button class="btn btn-outline" data-go="settings">Ajustes</button>
+        <button class="btn btn-outline" data-go="about">Acerca de</button>
+        <button class="btn btn-outline" data-go="deaMap">Buscar DEA</button>
+      </div>
+    </section>
+
+    <section id="check" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">Emergencia real</div>
+      </div>
+      <div class="legal-banner">Llama al 112 ante cualquier sospecha de parada cardiorrespiratoria.</div>
+      <div class="card question-card">
+        <h2>¿No responde y no respira normal?</h2>
+        <p class="question-sub">Los jadeos aislados cuentan como respiración anormal.</p>
+      </div>
+      <div style="margin-top:18px">
+        <button class="btn btn-green btn-xl" id="startEmergency">Sí, iniciar RCP</button>
+        <button class="btn btn-yellow btn-xl" id="goRecoveryPrompt">No / no estoy seguro</button>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-outline" data-go="home">Volver</button>
+    </section>
+
+    <section id="rcp" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">RCP en curso</div>
+      </div>
+      <div class="top-actions">
+        <a class="btn btn-red" href="tel:112">Llamar 112</a>
+        <button class="btn btn-blue" data-go="deaMap">Buscar DEA</button>
+        <button class="btn btn-green" id="haveDea">Tengo un DEA</button>
+      </div>
+      <div class="metrics">
+        <div class="card metric">
+          <div class="metric-label">Tiempo total</div>
+          <div class="metric-value" id="totalTimer">00:00</div>
+        </div>
+        <div class="card metric">
+          <div class="metric-label">Metrónomo</div>
+          <div class="metric-value bpm-tag" id="bpmDisplay">110 bpm</div>
+          <div class="small" id="metronomeStatus">Activo</div>
+        </div>
+      </div>
+      <div class="cycle-box" id="cycleAlert">
+        Ciclo actual de 2 minutos: <span id="cycleTimer">00:00</span>
+        <div class="progress-shell"><div class="progress-bar" id="cycleProgress"></div></div>
+      </div>
+      <div class="instruction-stack">
+        <div class="instruction-pill">Compresiones en el centro del pecho</div>
+        <div class="instruction-pill">Fuertes y rápidas</div>
+        <div class="instruction-pill">Sigue el ritmo: 100–120 por minuto</div>
+      </div>
+      <div class="tiny-row">
+        <button class="btn btn-outline" id="toggleMetronomeBtn">Pausar metrónomo</button>
+        <button class="btn btn-outline" id="toggleVoiceBtn">Voz</button>
+      </div>
+      <div class="bottom-fixed">
+        <button class="btn btn-soft btn-xl" id="backToBreathing">Ha vuelto a respirar</button>
+        <button class="btn btn-outline" style="margin-top:10px" data-go="home">Volver a inicio</button>
+      </div>
+    </section>
+
+    <section id="dea" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">Uso de DEA / DESA</div>
+      </div>
+      <div class="card">
+        <div class="section-title">Sigue estas instrucciones</div>
+        <div class="list">
+          <div class="step"><div class="step-num">1</div><div>Enciende el DEA.</div></div>
+          <div class="step"><div class="step-num">2</div><div>Coloca los parches sobre el pecho descubierto.</div></div>
+          <div class="step"><div class="step-num">3</div><div>No toques a la persona durante el análisis.</div></div>
+          <div class="step"><div class="step-num">4</div><div>Si indica descarga, aplícala.</div></div>
+          <div class="step"><div class="step-num">5</div><div>Reanuda la RCP enseguida durante 2 minutos.</div></div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn btn-orange btn-xl" id="shockApplied">Descarga aplicada</button>
+        <button class="btn btn-green btn-xl" id="backRcpFromDea">Volver a RCP</button>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-outline" data-go="rcp">Volver</button>
+    </section>
+
+    <section id="recovery" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">Recuperación</div>
+      </div>
+      <div class="card big-center">
+        <h2>Colócalo en posición lateral de seguridad</h2>
+        <p class="hero-text">Vigila la respiración hasta que llegue ayuda.</p>
+        <div class="final-time" id="recoveryTimer">00:00</div>
+      </div>
+      <div class="list" style="margin-top:16px">
+        <div class="step"><div class="step-num">1</div><div>Asegura una posición estable y segura.</div></div>
+        <div class="step"><div class="step-num">2</div><div>Coloca el brazo más cercano en ángulo recto.</div></div>
+        <div class="step"><div class="step-num">3</div><div>Cruza el otro brazo sobre el pecho y dobla la pierna lejana.</div></div>
+        <div class="step"><div class="step-num">4</div><div>Gira a la persona hacia ti y revisa que siga respirando.</div></div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-green btn-xl" id="finishEvent">Finalizar</button>
+      <button class="btn btn-outline" style="margin-top:10px" data-go="home">Inicio</button>
+    </section>
+
+    <section id="training" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">Modo entrenamiento</div>
+      </div>
+      <div class="card">
+        <h2>Practica sin llamada real</h2>
+        <p class="hero-text">Ensaya el ritmo, el flujo de RCP y el uso del DEA. Puedes usar el metrónomo y navegar por los pasos.</p>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn btn-green btn-xl" id="startTraining">Iniciar simulación</button>
+      </div>
+      <img class="poster" src="assets/cardioprotegido.png" alt="Algoritmo cardioprotegido Proyecto Reanima+ Vida" />
+      <p class="notice">Este esquema visual se incluye como apoyo rápido dentro de la app.</p>
+      <div style="margin-top:16px">
+        <a class="btn btn-blue" href="manual-svb.pdf" download>Descargar manual PDF</a>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-outline" data-go="home">Volver</button>
+    </section>
+
+    <section id="deaMap" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">Buscar DEA cercano</div>
+      </div>
+      <div class="card">
+        <div class="section-title">Localización</div>
+        <p>La app puede abrir el mapa con tu ubicación para ayudarte a buscar un desfibrilador cercano.</p>
+        <div class="map-actions">
+          <button class="btn btn-blue" id="locateBtn">Usar mi ubicación</button>
+          <button class="btn btn-outline" id="openMapsBtn">Abrir mapa</button>
+        </div>
+        <div id="locationResult" class="notice">Sin ubicación todavía.</div>
+      </div>
+      <div class="map-box card">
+        <div class="section-title">Qué hacer mientras llega el DEA</div>
+        <div class="list">
+          <div class="step"><div class="step-num">1</div><div>Pide a otra persona que busque el DEA si es posible.</div></div>
+          <div class="step"><div class="step-num">2</div><div>No detengas las compresiones salvo para colocar el DEA o analizar.</div></div>
+          <div class="step"><div class="step-num">3</div><div>Sigue las instrucciones auditivas del dispositivo.</div></div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-outline" data-go="home">Volver</button>
+    </section>
+
+    <section id="history" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">Historial local</div>
+      </div>
+      <div class="card">
+        <div class="section-title">Eventos guardados</div>
+        <div id="historyList" class="list"></div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-outline" data-go="home">Volver</button>
+    </section>
+
+    <section id="settings" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">Ajustes</div>
+      </div>
+      <div class="card">
+        <div class="switch-row">
+          <div>
+            <div class="section-title" style="margin:0">Voz guiada</div>
+            <div class="small">Lee indicaciones clave en voz alta.</div>
+          </div>
+          <button class="toggle" id="voiceToggle"></button>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="section-title" style="margin:0">Vibración</div>
+            <div class="small">Refuerzo del ritmo y aviso cada 2 minutos.</div>
+          </div>
+          <button class="toggle" id="vibrationToggle"></button>
+        </div>
+        <div class="switch-row">
+          <div>
+            <div class="section-title" style="margin:0">Modo manos libres</div>
+            <div class="small">Mantiene la pantalla despierta cuando sea posible.</div>
+          </div>
+          <button class="toggle" id="handsfreeToggle"></button>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="section-title">Ritmo del metrónomo</div>
+        <div class="chip-row">
+          <button class="chip" data-bpm="100">100 bpm</button>
+          <button class="chip active" data-bpm="110">110 bpm</button>
+          <button class="chip" data-bpm="120">120 bpm</button>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn btn-outline" id="clearHistoryBtn">Borrar historial</button>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-outline" data-go="home">Volver</button>
+    </section>
+
+    <section id="about" class="screen">
+      <div class="brand">
+        <img src="assets/icon-512.png" alt="Logo" />
+        <div class="brand-title">Acerca de</div>
+      </div>
+      <div class="card">
+        <h2>Proyecto Reanima+ Vida</h2>
+        <p class="hero-text">Formación y asistencia en Soporte Vital Básico.</p>
+        <div class="list" style="margin-top:16px">
+          <div class="step"><div class="step-num">✓</div><div>La secuencia prioriza reconocimiento precoz, aviso al 112, RCP temprana y desfibrilación precoz.</div></div>
+          <div class="step"><div class="step-num">✓</div><div>Compresiones torácicas recomendadas a 100–120 por minuto.</div></div>
+          <div class="step"><div class="step-num">✓</div><div>Cuando haya DEA, debe encenderse pronto y seguir sus instrucciones auditivas.</div></div>
+        </div>
+      </div>
+      <img class="poster" src="assets/cardioprotegido.png" alt="Instrucciones para el uso del desfibrilador" />
+      <div class="card" style="margin-top:14px">
+        <div class="section-title">Material del curso</div>
+        <a class="btn btn-blue" href="manual-svb.pdf" download>Descargar manual PDF</a>
+      </div>
+      <div class="card" style="margin-top:14px">
+        <div class="section-title">Contacto</div>
+        <p>www.proyectoreanimavida.com</p>
+        <p>proyectoreanimavida@gmail.com</p>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn btn-outline" data-go="home">Volver</button>
+    </section>
+  </div>
+
+  <script>
+    const screens = [...document.querySelectorAll('.screen')];
+    const state = {
+      settings: loadSettings(),
+      history: loadHistory(),
+      eventStartTs: null,
+      cycleStartTs: null,
+      totalTimerId: null,
+      wakeLock: null,
+      audioCtx: null,
+      metronomeInterval: null,
+      isMetronomeOn: false,
+      deferredInstallPrompt: null,
+      trainingMode: false,
+      currentCoords: null,
+    };
+
+    function showScreen(id) {
+      screens.forEach(screen => screen.classList.toggle('active', screen.id === id));
+      if (id !== 'rcp' && id !== 'dea' && id !== 'recovery') stopWakeLockIfNeeded();
+      if (id === 'history') renderHistory();
+      window.scrollTo(0, 0);
+    }
+
+    document.querySelectorAll('[data-go]').forEach(btn => {
+      btn.addEventListener('click', () => showScreen(btn.dataset.go));
+    });
+
+    setTimeout(() => showScreen('home'), 1500);
+
+    function formatTime(ms) {
+      const totalSec = Math.max(0, Math.floor(ms / 1000));
+      const m = String(Math.floor(totalSec / 60)).padStart(2, '0');
+      const s = String(totalSec % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function startEvent(mode = 'emergency') {
+      state.trainingMode = mode === 'training';
+      state.eventStartTs = Date.now();
+      state.cycleStartTs = Date.now();
+      startTimers();
+      startMetronome();
+      requestWakeLockIfNeeded();
+      speakNow('Empieza compresiones. Comprime fuerte y rápido en el centro del pecho.');
+      showScreen('rcp');
+    }
+
+    function startTimers() {
+      clearInterval(state.totalTimerId);
+      state.totalTimerId = setInterval(() => {
+        const totalElapsed = Date.now() - state.eventStartTs;
+        const cycleElapsed = Date.now() - state.cycleStartTs;
+        document.getElementById('totalTimer').textContent = formatTime(totalElapsed);
+        document.getElementById('recoveryTimer').textContent = formatTime(totalElapsed);
+        document.getElementById('cycleTimer').textContent = formatTime(cycleElapsed);
+        document.getElementById('cycleProgress').style.width = `${Math.min(100, (cycleElapsed / 120000) * 100)}%`;
+        if (cycleElapsed >= 120000) {
+          cycleResetAlert();
+        }
+      }, 250);
+    }
+
+    function cycleResetAlert() {
+      state.cycleStartTs = Date.now();
+      const box = document.getElementById('cycleAlert');
+      box.animate([
+        { transform: 'scale(1)', background: '#fff7d1' },
+        { transform: 'scale(1.02)', background: '#ffe89a' },
+        { transform: 'scale(1)', background: '#fff7d1' }
+      ], { duration: 900, iterations: 1 });
+      vibratePattern([250, 120, 250]);
+      speakNow('Han pasado dos minutos. Si hay relevo, cambiad. Si no, continuad la RCP.');
+    }
+
+    function finishEvent(status) {
+      const endTs = Date.now();
+      if (!state.eventStartTs) return showScreen('home');
+      const record = {
+        date: new Date().toLocaleString('es-ES'),
+        status,
+        durationMs: endTs - state.eventStartTs,
+        mode: state.trainingMode ? 'Entrenamiento' : 'Emergencia real'
+      };
+      state.history.unshift(record);
+      localStorage.setItem('reanima_history', JSON.stringify(state.history.slice(0, 30)));
+      stopAllRuntime();
+      renderHistory();
+      showScreen('home');
+    }
+
+    function stopAllRuntime() {
+      clearInterval(state.totalTimerId);
+      state.totalTimerId = null;
+      stopMetronome();
+      stopWakeLockIfNeeded();
+      state.eventStartTs = null;
+      state.cycleStartTs = null;
+      state.trainingMode = false;
+      document.getElementById('totalTimer').textContent = '00:00';
+      document.getElementById('cycleTimer').textContent = '00:00';
+      document.getElementById('recoveryTimer').textContent = '00:00';
+      document.getElementById('cycleProgress').style.width = '0%';
+    }
+
+    function loadSettings() {
+      return {
+        voice: true,
+        vibration: true,
+        handsfree: true,
+        bpm: 110,
+        ...JSON.parse(localStorage.getItem('reanima_settings') || '{}')
+      };
+    }
+
+    function saveSettings() {
+      localStorage.setItem('reanima_settings', JSON.stringify(state.settings));
+      updateSettingsUI();
+      document.getElementById('bpmDisplay').textContent = `${state.settings.bpm} bpm`;
+    }
+
+    function loadHistory() {
+      return JSON.parse(localStorage.getItem('reanima_history') || '[]');
+    }
+
+    function renderHistory() {
+      const el = document.getElementById('historyList');
+      el.innerHTML = '';
+      if (!state.history.length) {
+        el.innerHTML = '<div class="history-item">Todavía no hay eventos guardados en este dispositivo.</div>';
+        return;
+      }
+      state.history.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.innerHTML = `<strong>${item.mode}</strong><br>${item.date}<br>Estado final: ${item.status}<br>Duración: ${formatTime(item.durationMs)}`;
+        el.appendChild(div);
+      });
+    }
+
+    function updateSettingsUI() {
+      document.getElementById('voiceToggle').classList.toggle('on', state.settings.voice);
+      document.getElementById('vibrationToggle').classList.toggle('on', state.settings.vibration);
+      document.getElementById('handsfreeToggle').classList.toggle('on', state.settings.handsfree);
+      document.getElementById('toggleVoiceBtn').textContent = state.settings.voice ? 'Voz activa' : 'Voz apagada';
+      document.getElementById('bpmDisplay').textContent = `${state.settings.bpm} bpm`;
+      document.querySelectorAll('.chip[data-bpm]').forEach(chip => chip.classList.toggle('active', Number(chip.dataset.bpm) === state.settings.bpm));
+    }
+
+    document.getElementById('voiceToggle').onclick = () => { state.settings.voice = !state.settings.voice; saveSettings(); };
+    document.getElementById('vibrationToggle').onclick = () => { state.settings.vibration = !state.settings.vibration; saveSettings(); };
+    document.getElementById('handsfreeToggle').onclick = () => { state.settings.handsfree = !state.settings.handsfree; saveSettings(); if (!state.settings.handsfree) stopWakeLockIfNeeded(); };
+    document.querySelectorAll('.chip[data-bpm]').forEach(chip => chip.addEventListener('click', () => {
+      state.settings.bpm = Number(chip.dataset.bpm); saveSettings();
+      if (state.isMetronomeOn) { stopMetronome(); startMetronome(); }
+    }));
+
+    function speakNow(text) {
+      if (!state.settings.voice || !('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.lang = 'es-ES';
+      utter.rate = 1;
+      window.speechSynthesis.speak(utter);
+    }
+
+    function ensureAudio() {
+      if (!state.audioCtx) state.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+    }
+
+    function beep() {
+      ensureAudio();
+      const ctx = state.audioCtx;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = 880;
+      gain.gain.value = 0.0001;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const now = ctx.currentTime;
+      gain.gain.exponentialRampToValueAtTime(0.14, now + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.09);
+      osc.start(now);
+      osc.stop(now + 0.1);
+      vibratePattern(45);
+    }
+
+    function startMetronome() {
+      stopMetronome();
+      beep();
+      const interval = 60000 / state.settings.bpm;
+      state.metronomeInterval = setInterval(beep, interval);
+      state.isMetronomeOn = true;
+      document.getElementById('metronomeStatus').textContent = 'Activo';
+      document.getElementById('toggleMetronomeBtn').textContent = 'Pausar metrónomo';
+    }
+
+    function stopMetronome() {
+      clearInterval(state.metronomeInterval);
+      state.metronomeInterval = null;
+      state.isMetronomeOn = false;
+      document.getElementById('metronomeStatus').textContent = 'Pausado';
+      document.getElementById('toggleMetronomeBtn').textContent = 'Reanudar metrónomo';
+    }
+
+    function vibratePattern(pattern) {
+      if (state.settings.vibration && navigator.vibrate) navigator.vibrate(pattern);
+    }
+
+    async function requestWakeLockIfNeeded() {
+      if (!state.settings.handsfree || !('wakeLock' in navigator)) return;
+      try { state.wakeLock = await navigator.wakeLock.request('screen'); } catch (e) {}
+    }
+
+    async function stopWakeLockIfNeeded() {
+      try { if (state.wakeLock) await state.wakeLock.release(); } catch (e) {} finally { state.wakeLock = null; }
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && (document.getElementById('rcp').classList.contains('active') || document.getElementById('dea').classList.contains('active'))) {
+        requestWakeLockIfNeeded();
+      }
+    });
+
+    document.getElementById('startEmergency').onclick = () => startEvent('emergency');
+    document.getElementById('startTraining').onclick = () => startEvent('training');
+    document.getElementById('goRecoveryPrompt').onclick = () => showScreen('recovery');
+    document.getElementById('haveDea').onclick = () => { speakNow('Enciende el DEA y sigue sus instrucciones.'); showScreen('dea'); };
+    document.getElementById('backRcpFromDea').onclick = () => { showScreen('rcp'); requestWakeLockIfNeeded(); startMetronome(); };
+    document.getElementById('shockApplied').onclick = () => { state.cycleStartTs = Date.now(); showScreen('rcp'); speakNow('Descarga aplicada. Continúa la RCP durante dos minutos.'); startMetronome(); };
+    document.getElementById('backToBreathing').onclick = () => { stopMetronome(); speakNow('Colócalo en posición lateral de seguridad y vigila la respiración.'); showScreen('recovery'); };
+    document.getElementById('finishEvent').onclick = () => finishEvent('Finalizado');
+    document.getElementById('clearHistoryBtn').onclick = () => {
+      if (confirm('¿Borrar todo el historial guardado en este dispositivo?')) {
+        state.history = []; localStorage.removeItem('reanima_history'); renderHistory();
+      }
+    };
+    document.getElementById('toggleMetronomeBtn').onclick = () => {
+      if (state.isMetronomeOn) stopMetronome(); else startMetronome();
+    };
+    document.getElementById('toggleVoiceBtn').onclick = () => {
+      state.settings.voice = !state.settings.voice; saveSettings();
+    };
+
+    document.getElementById('locateBtn').onclick = () => {
+      if (!navigator.geolocation) {
+        document.getElementById('locationResult').textContent = 'Tu navegador no permite geolocalización.';
+        return;
+      }
+      document.getElementById('locationResult').textContent = 'Buscando ubicación…';
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const { latitude, longitude } = pos.coords;
+          state.currentCoords = { latitude, longitude };
+          document.getElementById('locationResult').textContent = `Ubicación detectada: ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+        },
+        () => document.getElementById('locationResult').textContent = 'No se pudo obtener la ubicación. Revisa permisos o abre el mapa manualmente.',
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    };
+
+    document.getElementById('openMapsBtn').onclick = () => {
+      const query = state.currentCoords
+        ? `https://www.google.com/maps/search/DEA/@${state.currentCoords.latitude},${state.currentCoords.longitude},17z`
+        : 'https://www.google.com/maps/search/DEA';
+      window.open(query, '_blank');
+    };
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      state.deferredInstallPrompt = e;
+      document.getElementById('installBox').classList.remove('hidden');
+    });
+
+    document.getElementById('installBtn').onclick = async () => {
+      if (!state.deferredInstallPrompt) return alert('En iPhone usa Compartir > Añadir a pantalla de inicio.');
+      state.deferredInstallPrompt.prompt();
+      await state.deferredInstallPrompt.userChoice;
+      state.deferredInstallPrompt = null;
+      document.getElementById('installBox').classList.add('hidden');
+    };
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
+    }
+
+    updateSettingsUI();
+    renderHistory();
+  </script>
+</body>
+</html>
